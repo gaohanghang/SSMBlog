@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ssm.blog.dao.BlogDao">
+    <!--通过resultMap，进行字段和属性的对应-->
+    <resultMap type="Blog" id="BlogResult">
+        <!--id 和result 将列映射到属性或简单的数据类型字段(String, int, double, Date等)。-->
+        <!--这两者唯一不同的是，在比较对象实例时id 作为结果集的标识属性。这有助于提高总体性能，特别是应用缓存和嵌套结果映射的时候。-->
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <!--博客摘要-->
+        <result property="summary" column="summary"/>
+        <!--发布日期-->
+        <result property="releaseDate" column="releaseDate"/>
+
+        <result property="clickHit" column="clickHit"/>
+        <result property="replyHit" column="replyHit"/>
+        <result property="content" column="content"/>
+        <result property="keyWord" column="keyWord"/>
+
+        <!-- 多对一的关系 -->
+
+        <!--其中property实体类属性 column关联外键类 select给实体类属性初始化的方法-->
+        <!--因为我们的实体类是BlogType对象 所以我们可以根据type_id的值从BlogTypDao的-->
+        <!--getById方法把这条记录查询出来并且赋值给blogType属性-->
+
+        <!-- property: 指的是属性名称，column: 数据库的列名或者列标签别名 select: 通过ID引用另一个加载复杂类型的映射语句。 -->
+        <association property="blogType" column="type_id" select="ssm.blog.dao.BlogTypeDao.getById">
+        </association>
+    </resultMap>
+
+    <!--public List<Blog> listBlog(Map<String,Object> map);-->
+    <select id="listBlog" parameterType="Map" resultMap="BlogResult">
+        SELECT * FROM t_blog
+        <where>
+            <if test="title!=null and title!=''">
+                and title like "%"#{title}"%"
+            </if>
+            <if test="typeId!=null and typeId!=''">
+                and type_id=#{typeId}
+            </if>
+            <if test="releaseDateStr!=null and releaseDateStr!=''">
+                and DATE_FORMAT(releaseDate,'%Y年%m月')=#{releaseDateStr}
+            </if>
+        </where>
+        ORDER BY releaseDate DESC
+        <if test="start!=null and end!=null">
+            limit #{start},#{end}
+        </if>
+    </select>
+
+
+    <!--public Long getTotal(Map<String,Object> map);-->
+    <select id="getTotal" parameterType="Map" resultType="Long">
+        SELECT COUNT(*) FROM t_blog
+        <where>
+            <if test="title!=null and title!=''">
+                and title like "%"#{title}"%"
+            </if>
+            <if test="typeId!=null and typeId!=''">
+                and type_id=#{typeId}
+            </if>
+            <if test="releaseDateStr!=null and releaseDateStr!=''">
+                and DATE_FORMAT(releaseDate,'%Y年%m月')=#{releaseDateStr}
+            </if>
+        </where>
+    </select>
+
+
+    <!--// 根据博客类型的id查询该类型下的博客数量-->
+    <!--public Integer getBlogByTypeId(Integer typeId);-->
+    <select id="getBlogByTypeId" parameterType="Integer" resultType="Integer">
+        select count(*) from t_blog where type_id=#{typeId}
+    </select>
+
+    <!--// 添加博客-->
+    <!--public Integer saveBlog(Blog blog);-->
+    <insert id="saveBlog" parameterType="Blog" keyProperty="id" useGeneratedKeys="true">
+        insert into t_blog VALUES (NULL ,#{title},#{summary},now(),0,0,#{content},#{keyWord},#{blogType.id})
+    </insert>
+
+    <!--// 更新博客-->
+    <!--public Integer updateBlog(Blog blog);-->
+    <update id="updateBlog" parameterType="Blog">
+        update t_blog
+        <set>
+            <if test="title!=null and title!=''">
+                title=#{title},
+            </if>
+            <if test="summary!=null and summary!=''">
+                summary=#{summary},
+            </if>
+            <if test="content!=null and content!=''">
+                content=#{content},
+            </if>
+            <if test="blogType.id!=null">
+                type_id=#{blogType.id},
+            </if>
+            <if test="clickHit!=null">
+                clickHit=#{clickHit},
+            </if>
+            <if test="replyHit!=null">
+                replyHit=#{replyHit},
+            </if>
+            <if test="keyWord!=null and keyWord!=''">
+                keyWord=#{keyWord},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <!--// 删除博客-->
+    <!--public Integer deleteBlog(Integer id);-->
+    <delete id="deleteBlog" parameterType="java.lang.Integer">
+        DELETE FROM t_blog
+        where id=#{id}
+    </delete>
+
+    <!--// 通过id获取博客-->
+    <!--public Blog getById(Integer id);-->
+    <select id="getById" parameterType="java.lang.Integer" resultMap="BlogResult">
+        SELECT * from t_blog where id=#{id}
+    </select>
+
+</mapper>
