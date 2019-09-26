@@ -10,8 +10,6 @@
 
 [【ssm个人博客项目实战02】easy UI搭建后台管理界面](https://www.jianshu.com/p/61dbc5f724e6)
 
-[easyUI自定义icon](https://www.jianshu.com/p/0b6de28301c7)
-
 [【ssm个人博客项目实战03】左侧导航菜单功能实现](https://www.jianshu.com/p/e24b71dafb5c)
 
 [【ssm个人博客项目实战04】mybatis实现博客类别的增删改查分页](https://www.jianshu.com/p/7f84ad736386)
